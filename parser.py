@@ -4,6 +4,7 @@ from datetime import datetime
 from datetime import timedelta
 
 import sys
+import os
 
 def read(path):
     f = open(path, "r");
@@ -46,7 +47,10 @@ def is_in_current_period(date_str, period):
     elif (period == "month"):
 
         start_of_month = current_date.replace(day=1)
-        next_month = current_date.replace(month=current_date.month + 1, day=1)
+        if (current_date.month != 12):
+            next_month = current_date.replace(month=current_date.month + 1, day=1)
+        else:
+            next_month = current_date.replace(month=current_date.month, day=current_date.day)
         end_of_month = next_month - timedelta(days=1)
 
         return start_of_month <= date_to_check <= end_of_month
@@ -227,19 +231,32 @@ def get_recap_by_project(datas, period):
 
     return projects;
 
+# just print recap (and compute the all_projects total)
+
 def print_recap(projects):
+
+
+    #clear
+    os.system("clear");
+    
+
+    #print recap
+    
+    print("===============LOGS================\n");
+
     all_period_total = 0;
 
     for project in projects:
         print('[['+project['label']+']]');
         for label, duration in project['activities'].items():
             all_period_total += duration;
-            if (len(label) > 10):
+            if (len(label) >= 9):
                 print('\t'+label+'\t'+minutes_to_h_m(duration)+'');
             else:
                 print('\t'+label+'\t\t'+minutes_to_h_m(duration)+'');
         print('\ttotal:\t\t'+minutes_to_h_m(project['total'])+'\n')
-                
+    
+
     print('[[all_projects]]');
     print('\ttotal:\t'+minutes_to_h_m(all_period_total)+'\n')
 
@@ -284,7 +301,7 @@ while i < len(lines):
 
     # parse all inside
     while i < len(lines) and "**" not in lines[i]: # while next dates is not detected
-        print("[PARSING] line : "+str(i + 1));
+        #print("[PARSING] line : "+str(i + 1));
         line = lines[i];
         if "*" in line: #new time
             time = parse_time(line);
